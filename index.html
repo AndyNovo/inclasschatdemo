@@ -8,14 +8,45 @@
     </head>
     <body>
         <h1>Dumb Chat</h1>
+        <input type="text" placeholder="username" id="uname" />
+        <input type="text" placeholder="message" id="msg" />
+        <button type="button" id="sendme">Send Message</button>
+        <ul id="msgs">
+        </ul>
         <script>
             $(document).ready(function(){
-               $.ajax({
-                   url: "api.php",
-                   method: "GET",
-                   success: data=>{
-                       alert(data);
-                   }
+               let showmsgs = function(msgArray){
+                   $("#msgs").html('');//empty the element
+                   msgArray.map(msg=>{
+                       $("#msgs").append(`<li><strong>${msg.author}:</strong> ${msg.content}</li>`);
+                   });
+               };
+               let fetchmsgs = function(){
+                   $.ajax({
+                       url: "api.php",
+                       method: "GET",
+                       success: data=>{
+                           showmsgs(data);
+                       }
+                   });
+               }
+               setInterval(fetchmsgs, 3000);
+               fetchmsgs();
+               $("#sendme").on("click", function(evt){
+                  let data = {
+                      author: $("#uname").val() || "anon",
+                      content: $("#msg").val() || "msg here"
+                  };
+                  $.ajax({
+                      url: "api.php",
+                      method: "POST",
+                      data: data,
+                      success: data=>{
+                          console.log("success");
+                          $("#msg").val('');
+                          fetchmsgs();
+                      }
+                  });
                });
             });
         </script>
